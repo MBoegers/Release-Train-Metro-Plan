@@ -3,6 +3,8 @@
 We will analyze relations between OpenRewrite artifacts to understand the release train and see which releases a change implies.
 We will use OpenRewrite to query the data and build a visualization on top of it to understand the whole picture.
 
+![Release Train Metro Plan](src/main/static/images/release-train-metro-plan.png)
+
 ## Abstract
 
 Teams of Software developers have an allergy relationship to duplicate code for good reasons. Introducing shared libraries is a common medicine in these situations, but like each medicine, shared code has an unintended consequence — it leads to coupling between components and makes release planning mandatory.
