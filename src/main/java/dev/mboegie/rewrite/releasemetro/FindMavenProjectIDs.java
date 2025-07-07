@@ -18,13 +18,13 @@ public class FindMavenProjectIDs extends Recipe {
     public transient ProjectCoordinates projectCoordinatess = new ProjectCoordinates(this);
 
     @Override
-    public @NlsRewrite.DisplayName String getDisplayName() {
+    public String getDisplayName() {
         return "Find maven project IDs";
     }
 
     @Override
-    public @NlsRewrite.Description String getDescription() {
-        return "Find Maven gourpId and artifactId in pom.xml files to determine the project ID.";
+    public String getDescription() {
+        return "Find Maven group Id and artifactId in pom.xml files to determine the project ID.";
     }
 
     @Override
