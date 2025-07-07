@@ -13,8 +13,8 @@ plugins {
 }
 
 // Set as appropriate for your organization
-group = "com.yourorg"
-description = "Rewrite recipes."
+group = "dev.mboegie.rewrite"
+description = "A set of recipes to derive your release train's metro plan from your organizations reporsitries using OpenRewrite."
 
 dependencies {
     // The bom version can also be set to a specific version
