@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>D3 Directed Graph with Colored Links</title>
+    <style>
+        svg { border: 1px solid #ccc; }
+        .link.dependency { stroke: steelblue; }
+        .link.parent { stroke: tomato; }
+        .link path { stroke-width: 2px; }
+        .node circle { fill: #69b3a2; stroke: #333; stroke-width: 1.5px; }
+        .node text { font-family: sans-serif; font-size: 14px; pointer-events: none; }
+    </style>
+</head>
+<body>
+<svg width="1400" height="800"></svg>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script type="module">
+    import { nodes, links } from './data/parent-dependency.js';
+
+    const width = 1400, height = 800;
+
+    const svg = d3.select("svg")
+        .attr("viewBox", [0, 0, width, height]);
+
+    // --- Wrap graph in a zoomable <g>
+    const container = svg.append("g");
+
+    // Arrowhead markers
+    const defs = container.append("defs");
+    ["parent", "dependency"].forEach(type => {
+        defs.append("marker")
+            .attr("id", `arrow-${type}`)
+            .attr("viewBox", "0 -5 10 10")
+            .attr("refX", 25)
+            .attr("refY", 0)
+            .attr("markerUnits", "userSpaceOnUse")
+            .attr("markerWidth", 12)
+            .attr("markerHeight", 12)
+            .attr("orient", "auto")
+            .append("path")
+            .attr("d", "M0,-5L10,0L0,5")
+            .attr("fill", type === "dependency" ? "steelblue" : "tomato");
+    });
+
+    // --- Add zoom behavior
+    const zoom = d3.zoom()
+        .scaleExtent([0.5, 5])
+        .on("zoom", (event) => {
+            container.attr("transform", event.transform);
+        });
+    svg.call(zoom); // enable pan/zoom on the whole SVG :contentReference[oaicite:1]{index=1}
+
+    // --- Force simulation setup
+    const simulation = d3.forceSimulation(nodes)
+        .force("link", d3.forceLink(links).id(d => d.id).distance(500).strength(0.1))
+        .force("charge", d3.forceManyBody().strength(-400))
+        .force("center", d3.forceCenter(width / 2, height / 2));
+
+    // Draw links
+    const link = container.append("g")
+        .selectAll("path")
+        .data(links)
+        .join("path")
+        .attr("class", d => `link ${d.type}`)
+        .attr("marker-end", d => `url(#arrow-${d.type})`);
+
+    // Draw nodes
+    const node = container.append("g")
+        .selectAll("g")
+        .data(nodes)
+        .join("g")
+        .attr("class", "node")
+        .call(d3.drag()
+            .on("start", (e, d) => {
+                if (!e.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x; d.fy = d.y;
+            })
+            .on("drag", (e, d) => {
+                d.fx = e.x; d.fy = e.y;
+            })
+            .on("end", (e, d) => {
+                if (!e.active) simulation.alphaTarget(0);
+                d.fx = null; d.fy = null;
+            })
+        );
+
+    node.append("circle").attr("r", 20);
+    node.append("text").attr("dy", "0.35em").attr("x", 30).text(d => d.id);
+
+    // Update positions each tick
+    simulation.on("tick", () => {
+        link.attr("d", d => {
+            const { x: sx, y: sy } = d.source;
+            const { x: tx, y: ty } = d.target;
+            return `M${sx},${sy} L${tx},${ty}`;
+        });
+        node.attr("transform", d => `translate(${d.x},${d.y})`);
+    });
+</script>
+</body>
+</html>
