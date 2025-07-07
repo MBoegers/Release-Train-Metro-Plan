@@ -17,6 +17,9 @@ dependencies {
 
     implementation("org.assertj:assertj-core:latest.release")
 
+    // to have access to org.openrewrite.java.dependencies.DependencyInsight
+    implementation("org.openrewrite.recipe:rewrite-java-dependencies")
+
     // for dev.mboegie.rewrite.releasemetro.FindMavenProjectIDs
     implementation("org.openrewrite:rewrite-xml")
     implementation("org.openrewrite:rewrite-maven")

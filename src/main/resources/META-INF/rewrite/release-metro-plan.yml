@@ -1,0 +1,19 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: dev.mboegie.rewrite.releasemetro.ReleaseMetroPlan
+displayName: Analyse Organization's Release Metro Plan
+description: Gathers the basic information to create and understand the organizations release train metro plan.
+recipeList:
+  - dev.mboegie.rewrite.releasemetro.FindProjectIDs
+  - org.openrewrite.java.dependencies.DependencyInsight:
+      groupIdPattern: 'org.openrewrite*'
+      artifactIdPattern: '*'
+
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: dev.mboegie.rewrite.releasemetro.FindProjectIDs
+displayName: Find Project IDs
+description: Find group and artifact ID from gradle and maven projects.
+recipeList:
+  - dev.mboegie.rewrite.releasemetro.FindMavenProjectIDs
+  - dev.mboegie.rewrite.releasemetro.FindGradleProjectIDs
