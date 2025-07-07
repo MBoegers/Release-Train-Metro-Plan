@@ -29,7 +29,8 @@ public class FindMavenProjectIDs extends Recipe {
 
     @Override
     public TreeVisitor<?, ExecutionContext> getVisitor() {
-        return Preconditions.check(new FindMavenProject(),
+        return Preconditions.check(
+                Preconditions.and(new FindMavenProject().getVisitor(), new FindSourceFiles("**/pom.xml").getVisitor()),
                 new XmlIsoVisitor<ExecutionContext>() {
                     @Override
                     public Xml.Document visitDocument(Xml.Document document, ExecutionContext ctx) {
