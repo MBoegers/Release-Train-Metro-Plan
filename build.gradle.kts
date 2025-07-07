@@ -28,6 +28,10 @@ dependencies {
     implementation("org.assertj:assertj-core:latest.release")
     runtimeOnly("org.openrewrite:rewrite-java-17")
 
+    // for dev.mboegie.rewrite.releasemetro.FindMavenProjectIDs
+    implementation("org.openrewrite:rewrite-xml")
+    implementation("org.openrewrite:rewrite-maven")
+
     // Refaster style recipes need the rewrite-templating annotation processor and dependency for generated recipes
     // https://github.com/openrewrite/rewrite-templating/releases
     annotationProcessor("org.openrewrite:rewrite-templating:latest.release")
