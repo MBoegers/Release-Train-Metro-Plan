@@ -6,11 +6,17 @@ initscript {
         classpath("org.openrewrite:plugin:latest.release")
     }
 }
+
 rootProject {
     plugins.apply(org.openrewrite.gradle.RewritePlugin)
     dependencies {
         rewrite("org.openrewrite.recipe:rewrite-rewrite:latest.release")
     }
+
+    rewrite {
+        activeRecipe("org.openrewrite.java.recipes.ExamplesExtractor")
+    }
+
     afterEvaluate {
         if (repositories.isEmpty()) {
             repositories {
