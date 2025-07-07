@@ -4,6 +4,7 @@ import dev.mboegie.rewrite.releasemetro.table.ProjectCoordinates;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.openrewrite.*;
+import org.openrewrite.marker.SearchResult;
 import org.openrewrite.maven.search.FindMavenProject;
 import org.openrewrite.xml.XmlIsoVisitor;
 import org.openrewrite.xml.search.FindTags;
@@ -38,8 +39,10 @@ public class FindMavenProjectIDs extends Recipe {
                         Optional<String> artifactId = findArtifactId(document);
 
                         if (groupId.isPresent() && artifactId.isPresent()) {
+                            ProjectCoordinates.Row row = new ProjectCoordinates.Row(groupId.get(), artifactId.get());
                             projectCoordinatess.insertRow(ctx,
-                                    new ProjectCoordinates.Row(groupId.get(), artifactId.get()));
+                                    row);
+                            return SearchResult.found(document, row.toString());
                         }
 
                         return document;

@@ -16,8 +16,8 @@ class FindMavenProjectIDsTest implements RewriteTest {
         spec.recipe(new FindMavenProjectIDs());
     }
 
-    @DocumentExample
     @Test
+    @DocumentExample
     void singleModule() {
         rewriteRun(
           spec -> spec.dataTable(ProjectCoordinates.Row.class, rows -> {
@@ -26,8 +26,21 @@ class FindMavenProjectIDsTest implements RewriteTest {
               );
           }),
           pomXml(
+            //language=xml
             """
               <?xml version="1.0" encoding="UTF-8"?>
+              <project xmlns="http://maven.apache.org/POM/4.0.0"
+                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                       xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+                  <modelVersion>4.0.0</modelVersion>
+                  <groupId>com.example</groupId>
+                  <artifactId>simple-project</artifactId>
+                  <version>1.0.0</version>
+              </project>
+              """,
+            //language=xml
+            """
+              <!--~~(com.example:simple-project)~~>--><?xml version="1.0" encoding="UTF-8"?>
               <project xmlns="http://maven.apache.org/POM/4.0.0"
                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -52,8 +65,26 @@ class FindMavenProjectIDsTest implements RewriteTest {
               );
           }),
           pomXml(
+            //language=xml
             """
               <?xml version="1.0" encoding="UTF-8"?>
+              <project xmlns="http://maven.apache.org/POM/4.0.0"
+                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                       xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+                  <modelVersion>4.0.0</modelVersion>
+                  <groupId>com.example</groupId>
+                  <artifactId>parent-project</artifactId>
+                  <version>1.0.0</version>
+                  <packaging>pom</packaging>
+                  <modules>
+                      <module>module-a</module>
+                      <module>module-b</module>
+                  </modules>
+              </project>
+              """,
+            //language=xml
+            """
+              <!--~~(com.example:parent-project)~~>--><?xml version="1.0" encoding="UTF-8"?>
               <project xmlns="http://maven.apache.org/POM/4.0.0"
                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -70,8 +101,24 @@ class FindMavenProjectIDsTest implements RewriteTest {
               """
           ),
           pomXml(
+            //language=xml
             """
               <?xml version="1.0" encoding="UTF-8"?>
+              <project xmlns="http://maven.apache.org/POM/4.0.0"
+                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                       xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+                  <modelVersion>4.0.0</modelVersion>
+                  <parent>
+                      <groupId>com.example</groupId>
+                      <artifactId>parent-project</artifactId>
+                      <version>1.0.0</version>
+                  </parent>
+                  <artifactId>module-a</artifactId>
+              </project>
+              """,
+            //language=xml
+            """
+              <!--~~(com.example:module-a)~~>--><?xml version="1.0" encoding="UTF-8"?>
               <project xmlns="http://maven.apache.org/POM/4.0.0"
                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -87,8 +134,24 @@ class FindMavenProjectIDsTest implements RewriteTest {
             spec -> spec.path("module-a/pom.xml")
           ),
           pomXml(
+            //language=xml
             """
               <?xml version="1.0" encoding="UTF-8"?>
+              <project xmlns="http://maven.apache.org/POM/4.0.0"
+                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                       xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+                  <modelVersion>4.0.0</modelVersion>
+                  <parent>
+                      <groupId>com.example</groupId>
+                      <artifactId>parent-project</artifactId>
+                      <version>1.0.0</version>
+                  </parent>
+                  <artifactId>module-b</artifactId>
+              </project>
+              """,
+            //language=xml
+            """
+              <!--~~(com.example:module-b)~~>--><?xml version="1.0" encoding="UTF-8"?>
               <project xmlns="http://maven.apache.org/POM/4.0.0"
                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -115,8 +178,26 @@ class FindMavenProjectIDsTest implements RewriteTest {
               );
           }),
           pomXml(
+            //language=xml
             """
               <?xml version="1.0" encoding="UTF-8"?>
+              <project xmlns="http://maven.apache.org/POM/4.0.0"
+                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                       xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+                  <modelVersion>4.0.0</modelVersion>
+                  <parent>
+                      <groupId>org.springframework.boot</groupId>
+                      <artifactId>spring-boot-starter-parent</artifactId>
+                      <version>3.2.0</version>
+                      <relativePath/>
+                  </parent>
+                  <artifactId>my-spring-app</artifactId>
+                  <version>1.0.0</version>
+              </project>
+              """,
+              //language=xml
+              """
+              <!--~~(org.springframework.boot:my-spring-app)~~>--><?xml version="1.0" encoding="UTF-8"?>
               <project xmlns="http://maven.apache.org/POM/4.0.0"
                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -144,6 +225,7 @@ class FindMavenProjectIDsTest implements RewriteTest {
               );
           }),
           pomXml(
+            //language=xml
             """
               <?xml version="1.0" encoding="UTF-8"?>
               <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -160,7 +242,25 @@ class FindMavenProjectIDsTest implements RewriteTest {
                   <artifactId>my-spring-app</artifactId>
                   <version>1.0.0</version>
               </project>
-              """
+            """,
+            //language=xml
+            """
+              <!--~~(com.mycompany:my-spring-app)~~>--><?xml version="1.0" encoding="UTF-8"?>
+              <project xmlns="http://maven.apache.org/POM/4.0.0"
+                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                       xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+                  <modelVersion>4.0.0</modelVersion>
+                  <parent>
+                      <groupId>org.springframework.boot</groupId>
+                      <artifactId>spring-boot-starter-parent</artifactId>
+                      <version>3.2.0</version>
+                      <relativePath/>
+                  </parent>
+                  <groupId>com.mycompany</groupId>
+                  <artifactId>my-spring-app</artifactId>
+                  <version>1.0.0</version>
+              </project>
+            """
           )
         );
     }

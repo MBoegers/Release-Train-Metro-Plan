@@ -5,8 +5,7 @@ import org.jspecify.annotations.Nullable;
 import org.openrewrite.*;
 import org.openrewrite.gradle.IsBuildGradle;
 import org.openrewrite.gradle.marker.GradleProject;
-
-import java.util.Optional;
+import org.openrewrite.marker.SearchResult;
 
 public class FindGradleProjectIDs extends Recipe {
 
@@ -32,13 +31,13 @@ public class FindGradleProjectIDs extends Recipe {
                             return null;
                         }
 
-                        Optional<GradleProject> gp = tree.getMarkers().findFirst(GradleProject.class);
-                        gp.map(GradleProject::getGroup).ifPresent(group -> {
-                            String artifactId = gp.map(GradleProject::getName).orElse("none");
-                            projectCoordinatess.insertRow(executionContext, new ProjectCoordinates.Row(group, artifactId));
-                        });
-
-                        return tree;
+                        return tree.getMarkers()
+                                .findFirst(GradleProject.class)
+                                .map(gp -> {
+                                    ProjectCoordinates.Row row = new ProjectCoordinates.Row(gp.getGroup(), gp.getName());
+                                    projectCoordinatess.insertRow(executionContext, row);
+                                    return SearchResult.found(tree, row.toString());
+                                }).orElse(tree);
                     }
                 });
     }

@@ -2,6 +2,7 @@ package dev.mboegie.rewrite.releasemetro;
 
 import dev.mboegie.rewrite.releasemetro.table.ProjectCoordinates;
 import org.junit.jupiter.api.Test;
+import org.openrewrite.DocumentExample;
 import org.openrewrite.gradle.toolingapi.Assertions;
 import org.openrewrite.test.RecipeSpec;
 import org.openrewrite.test.RewriteTest;
@@ -17,6 +18,7 @@ class FindGradleProjectIDsTest implements RewriteTest {
     }
 
     @Test
+    @DocumentExample
     void simpleProject() {
         rewriteRun(
           spec -> spec.dataTable(ProjectCoordinates.Row.class,
@@ -35,7 +37,21 @@ class FindGradleProjectIDsTest implements RewriteTest {
                   implementation("org.springframework:spring-core:5.3.21")
                   testImplementation ("org.junit.jupiter:junit-jupiter:5.8.2")
               }
-              """),
+              """,
+            // language=kotlin
+            """
+              /*~~(org.openrewrite.recipe:rewrite-testing-frameworks)~~>*/plugins {
+                  id("java")
+              }
+              
+              group = "org.openrewrite.recipe"
+              
+              dependencies {
+                  implementation("org.springframework:spring-core:5.3.21")
+                  testImplementation ("org.junit.jupiter:junit-jupiter:5.8.2")
+              }
+              """
+          ),
           settingsGradleKts(
             // language=groovy
             """
@@ -59,6 +75,13 @@ class FindGradleProjectIDsTest implements RewriteTest {
                   group = "org.openrewrite"
                   description = "Eliminate tech-debt. Automatically."
               }
+              """,
+            // language=kotlin
+            """
+              /*~~(org.openrewrite:rewrite)~~>*/allprojects {
+                  group = "org.openrewrite"
+                  description = "Eliminate tech-debt. Automatically."
+              }
               """),
           settingsGradleKts(
             // language=kotlin
@@ -79,12 +102,32 @@ class FindGradleProjectIDsTest implements RewriteTest {
                   implementation("org.openrewrite:rewrite-core:latest.release")
               }
               """,
+            // language=kotlin
+            """
+              /*~~(org.openrewrite:rewrite-gradle)~~>*/plugins {
+                  id("java")
+              }
+              
+              dependencies {
+                  implementation("org.openrewrite:rewrite-core:latest.release")
+              }
+              """,
             sourceSpecs -> sourceSpecs.path("rewrite-gradle/build.gradle")
           ),
           buildGradleKts(
             // language=kotlin
             """
               plugins {
+                  id("java")
+              }
+              
+              dependencies {
+                  implementation("org.openrewrite:rewrite-core:latest.release")
+              }
+              """,
+            // language=kotlin
+            """
+              /*~~(org.openrewrite:rewrite-java)~~>*/plugins {
                   id("java")
               }
               

@@ -1,5 +1,6 @@
 package dev.mboegie.rewrite.releasemetro.table;
 
+import lombok.ToString;
 import lombok.Value;
 import org.jspecify.annotations.Nullable;
 import org.openrewrite.Column;
@@ -23,5 +24,10 @@ public class ProjectCoordinates extends DataTable<ProjectCoordinates.Row> {
         @Column(displayName = "artifactId",
                 description = "Artifact ID of the current module/subproject")
         String artifactId;
+
+        @Override
+        public String toString() {
+            return (groupId != null? groupId : "") + ":" + artifactId;
+        }
     }
 }
