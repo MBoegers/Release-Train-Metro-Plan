@@ -5,6 +5,7 @@ displayName: Analyse Organization's Release Metro Plan
 description: Gathers the basic information to create and understand the organizations release train metro plan.
 recipeList:
   - dev.mboegie.rewrite.releasemetro.FindProjectIDs
+  - dev.mboegie.rewrite.releasemetro.FindParentRelationships
   - org.openrewrite.java.dependencies.DependencyInsight:
       groupIdPattern: 'org.openrewrite*'
       artifactIdPattern: '*'
@@ -17,3 +18,12 @@ description: Find group and artifact ID from gradle and maven projects.
 recipeList:
   - dev.mboegie.rewrite.releasemetro.FindMavenProjectIDs
   - dev.mboegie.rewrite.releasemetro.FindGradleProjectIDs
+
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: dev.mboegie.rewrite.releasemetro.FindParentRelationships
+displayName: Find Parent Relationships
+description: Find Maven parent POM and Gradle parent project relationships.
+recipeList:
+  - dev.mboegie.rewrite.releasemetro.FindMavenParentRelationships
+  - dev.mboegie.rewrite.releasemetro.FindGradleParentRelationships

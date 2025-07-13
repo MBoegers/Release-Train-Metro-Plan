@@ -35,8 +35,8 @@ public class FindMavenProjectIDs extends Recipe {
                 new XmlIsoVisitor<ExecutionContext>() {
                     @Override
                     public Xml.Document visitDocument(Xml.Document document, ExecutionContext ctx) {
-                        Optional<String> groupId = findGroupId(document);
-                        Optional<String> artifactId = findArtifactId(document);
+                        Optional<String> groupId = MavenPomExtractor.findGroupId(document);
+                        Optional<String> artifactId = MavenPomExtractor.findArtifactId(document);
 
                         if (groupId.isPresent() && artifactId.isPresent()) {
                             ProjectCoordinates.Row row = new ProjectCoordinates.Row(groupId.get(), artifactId.get());
@@ -48,28 +48,6 @@ public class FindMavenProjectIDs extends Recipe {
                         return document;
                     }
 
-                    private Optional<String> findArtifactId(Xml.Document document) {
-                        Xml.Tag maybeArtifactId = FindTags.findSingle(document, "/project/artifactId");
-                        if (maybeArtifactId != null) {
-                            return maybeArtifactId.getValue();
-                        }
-
-                        return Optional.empty();
-                    }
-
-                    private Optional<String> findGroupId(Xml.Document document) {
-                        Xml.Tag maybeGroupId = FindTags.findSingle(document, "/project/groupId");
-                        if (maybeGroupId != null && maybeGroupId.getValue().isPresent()) {
-                            return maybeGroupId.getValue();
-                        }
-
-                        Xml.Tag maybeParentGroupId = FindTags.findSingle(document, "/project/parent/groupId");
-                        if (maybeParentGroupId != null && maybeParentGroupId.getValue().isPresent()) {
-                            return maybeParentGroupId.getValue();
-                        }
-
-                        return Optional.empty();
-                    }
                 });
     }
 }

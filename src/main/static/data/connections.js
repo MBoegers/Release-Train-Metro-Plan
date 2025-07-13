@@ -128,6 +128,10 @@ export const links = [
     { source: "openrewrite/rewrite-migrate-java", target: "openrewrite/rewrite-analysis", type: "dependency" },
     { source: "openrewrite/rewrite-netty", target: "openrewrite/rewrite", type: "dependency" },
     { source: "openrewrite/rewrite-netty", target: "openrewrite/rewrite-templating", type: "dependency" },
+    // Example parent relationships - child projects pointing to their parent POMs
+    { source: "openrewrite/rewrite-java-dependencies", target: "openrewrite/rewrite", type: "parent" },
+    { source: "openrewrite/rewrite-static-analysis", target: "openrewrite/rewrite", type: "parent" },
+    { source: "openrewrite/rewrite-testing-frameworks", target: "openrewrite/rewrite", type: "parent" },
     { source: "openrewrite/rewrite-netty", target: "openrewrite/rewrite-java-dependencies", type: "dependency" },
     { source: "openrewrite/rewrite-okhttp", target: "openrewrite/rewrite", type: "dependency" },
     { source: "openrewrite/rewrite-okhttp", target: "openrewrite/rewrite-java-dependencies", type: "dependency" },
