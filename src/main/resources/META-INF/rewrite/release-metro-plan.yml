@@ -6,9 +6,7 @@ description: Gathers the basic information to create and understand the organiza
 recipeList:
   - dev.mboegie.rewrite.releasemetro.FindProjectIDs
   - dev.mboegie.rewrite.releasemetro.FindParentRelationships
-  - org.openrewrite.java.dependencies.DependencyInsight:
-      groupIdPattern: 'org.openrewrite*'
-      artifactIdPattern: '*'
+  - dev.mboegie.rewrite.releasemetro.FindUnusedDependencies
 
 ---
 type: specs.openrewrite.org/v1beta/recipe
@@ -27,3 +25,14 @@ description: Find Maven parent POM and Gradle parent project relationships.
 recipeList:
   - dev.mboegie.rewrite.releasemetro.FindMavenParentRelationships
   - dev.mboegie.rewrite.releasemetro.FindGradleParentRelationships
+
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: dev.mboegie.rewrite.releasemetro.FindUnusedDependencies
+displayName: Find Unused Dependencies
+description: Identify dependencies that are declared but potentially unused by analyzing imports and type usage.
+recipeList:
+  - dev.mboegie.rewrite.releasemetro.FindPotentiallyUnusedDependencies
+  - org.openrewrite.java.dependencies.DependencyInsight:
+      groupIdPattern: '*'
+      artifactIdPattern: '*'
