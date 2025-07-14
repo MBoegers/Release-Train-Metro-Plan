@@ -1,4 +1,4 @@
-export const nodes = [
+const nodes = [
     { id: "openrewrite/rewrite-all" },
     { id: "openrewrite/rewrite-csharp" },
     { id: "openrewrite/rewrite" },
@@ -37,7 +37,7 @@ export const nodes = [
     { id: "openrewrite/rewrite-third-party" },
     { id: "openrewrite/rewrite-struts" }
 ];
-export const links = [
+const links = [
     { source: "openrewrite/rewrite-all", target: "openrewrite/rewrite-csharp", type: "dependency" },
     { source: "openrewrite/rewrite-all", target: "openrewrite/rewrite", type: "dependency" },
     { source: "openrewrite/rewrite-all", target: "openrewrite/rewrite-python", type: "dependency" },

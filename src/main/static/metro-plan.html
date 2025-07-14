@@ -2,8 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>D3 Directed Graph with Colored Links</title>
+    <title>Release Train Metro Plan</title>
     <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f8f9fa; }
+        h1 { color: #333; text-align: center; margin-bottom: 30px; }
+        .info-panel { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .stats { display: flex; gap: 30px; justify-content: center; font-size: 16px; }
+        .stat-item { display: flex; align-items: center; gap: 8px; }
+        .stat-value { font-weight: bold; color: #2c3e50; }
+        .visualization-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .output-panel { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .output-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #2c3e50; }
+        .output-content { font-family: 'Courier New', monospace; background-color: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 4px solid #3498db; }
+        .selected-node { color: #e74c3c; font-weight: bold; }
+        .level-group { margin-bottom: 12px; }
+        .level-title { font-weight: bold; color: #2980b9; margin-bottom: 5px; }
+        .node-list { margin-left: 20px; }
+        .legend { display: flex; gap: 20px; justify-content: center; margin-bottom: 15px; font-size: 14px; }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .legend-color { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #333; }
+        .legend-line { width: 30px; height: 2px; }
+        .legend-dashed { stroke-dasharray: 4,2; }
         svg { border: 1px solid #ccc; }
         .link.dependency { stroke: steelblue; }
         .link.parent { stroke: tomato; }
@@ -17,15 +36,82 @@
     </style>
 </head>
 <body>
-<svg width="1400" height="800"></svg>
+    <h1>Release Train Metro Plan</h1>
+
+    <div class="info-panel">
+        <div class="stats">
+            <div class="stat-item">
+                <span>📊 Artifacts:</span>
+                <span class="stat-value" id="nodeCount">-</span>
+            </div>
+            <div class="stat-item">
+                <span>🔗 Connections:</span>
+                <span class="stat-value" id="linkCount">-</span>
+            </div>
+            <div class="stat-item">
+                <span>⚡ Low Reference Dependencies:</span>
+                <span class="stat-value" id="lowRefCount">-</span>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #69b3a2;"></div>
+                <span>Normal Node</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #ff6b6b;"></div>
+                <span>Selected Node</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #74b9ff;"></div>
+                <span>Upstream Dependencies</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-line" style="background-color: steelblue;"></div>
+                <span>Dependency</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-line" style="background-color: tomato;"></div>
+                <span>Parent</span>
+            </div>
+            <div class="legend-item">
+                <svg width="30" height="2"><line x1="0" y1="1" x2="30" y2="1" stroke="steelblue" stroke-width="2" stroke-dasharray="4,2"></line></svg>
+                <span>Low References</span>
+            </div>
+        </div>
+    </div>
+    <div class="visualization-container">
+        <svg width="1400" height="800"></svg>
+    </div>
+    <div class="output-panel">
+        <div class="output-title">Dependency Analysis</div>
+        <div class="output-content" id="dependencyOutput">
+            Click on any node to see its upstream dependencies organized by transitivity level.
+        </div>
+    </div>
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<script type="module">
-    import { nodes, links } from './data/connections.js';
-
+<script src="./data/connections.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
     const width = 1400, height = 800;
+    
+    // Debug: Check if data is loaded
+    console.log('Nodes loaded:', nodes.length);
+    console.log('Links loaded:', links.length);
+    console.log('D3 version:', d3.version);
+    console.log('First node:', nodes[0]);
+    console.log('First link:', links[0]);
+    
+    // Update statistics
+    document.getElementById('nodeCount').textContent = nodes.length;
+    document.getElementById('linkCount').textContent = links.length;
+    document.getElementById('lowRefCount').textContent = links.filter(l => l.lowReferences).length;
 
-    const svg = d3.select("svg")
+    const svg = d3.select(".visualization-container svg")
         .attr("viewBox", [0, 0, width, height]);
+    
+    console.log('SVG selected:', svg.node());
 
     // --- Wrap graph in a zoomable <g>
     const container = svg.append("g");
@@ -62,6 +148,8 @@
         .force("charge", d3.forceManyBody().strength(-400))
         .force("center", d3.forceCenter(width / 2, height / 2));
 
+    console.log('Simulation created:', simulation);
+
     // Draw links
     const link = container.append("g")
         .selectAll("path")
@@ -69,6 +157,8 @@
         .join("path")
         .attr("class", d => `link ${d.type} ${d.lowReferences ? 'lowReferences' : ''}`)
         .attr("marker-end", d => `url(#arrow-${d.type})`);
+
+    console.log('Links created:', link.size());
 
     // Draw nodes
     const node = container.append("g")
@@ -92,6 +182,9 @@
 
     node.append("circle").attr("r", 20);
     node.append("text").attr("dy", "0.35em").attr("x", 30).text(d => d.id);
+    
+    console.log('Nodes created:', node.size());
+    console.log('Node elements:', node.nodes());
 
     // Add click handler for nodes
     let selectedNode = null;
@@ -112,14 +205,15 @@
             // Highlight clicked node
             d3.select(this).classed("highlighted", true);
             
-            // Find all nodes reachable backward from this node
-            const upstreamNodes = findUpstreamNodes(d.id, links);
-            console.log(`Clicked node: ${d.id}`);
-            console.log(`Found ${upstreamNodes.size} upstream nodes:`, Array.from(upstreamNodes));
+            // Find all nodes reachable backward from this node with transitivity levels
+            const { upstream: upstreamNodes, levels } = findUpstreamNodesWithLevels(d.id, links);
             
             // Highlight upstream nodes
             node.filter(n => upstreamNodes.has(n.id))
                 .classed("upstream", true);
+            
+            // Update output display
+            updateDependencyOutput(d.id, levels);
         }
     });
     
@@ -128,16 +222,18 @@
         selectedNode = null;
         node.classed("highlighted", false);
         node.classed("upstream", false);
+        clearDependencyOutput();
     });
     
-    // Function to find all nodes reachable backward from a given node
-    function findUpstreamNodes(targetNodeId, links) {
+    // Function to find all nodes reachable backward from a given node with transitivity levels
+    function findUpstreamNodesWithLevels(targetNodeId, links) {
         const upstream = new Set();
-        const toVisit = [targetNodeId];
+        const levels = new Map(); // nodeId -> level
+        const toVisit = [{id: targetNodeId, level: 0}];
         const visited = new Set();
         
         while (toVisit.length > 0) {
-            const current = toVisit.pop();
+            const {id: current, level} = toVisit.shift();
             if (visited.has(current)) continue;
             visited.add(current);
             
@@ -149,16 +245,71 @@
                 
                 if (linkTargetId === current && !visited.has(linkSourceId)) {
                     upstream.add(linkSourceId);
-                    toVisit.push(linkSourceId);
+                    const newLevel = level + 1;
+                    levels.set(linkSourceId, newLevel);
+                    toVisit.push({id: linkSourceId, level: newLevel});
                 }
             });
         }
         
-        return upstream;
+        return { upstream, levels };
+    }
+    
+    // Legacy function for backward compatibility
+    function findUpstreamNodes(targetNodeId, links) {
+        const result = findUpstreamNodesWithLevels(targetNodeId, links);
+        return result.upstream;
+    }
+    
+    // Function to update the dependency output display
+    function updateDependencyOutput(selectedNodeId, levels) {
+        const outputDiv = document.getElementById('dependencyOutput');
+        
+        if (levels.size === 0) {
+            outputDiv.innerHTML = `<div class="selected-node">Selected: ${selectedNodeId}</div>No upstream dependencies found.`;
+            return;
+        }
+        
+        // Group nodes by transitivity level
+        const levelGroups = new Map();
+        for (const [nodeId, level] of levels) {
+            if (!levelGroups.has(level)) {
+                levelGroups.set(level, []);
+            }
+            levelGroups.get(level).push(nodeId);
+        }
+        
+        // Sort levels and create output
+        const sortedLevels = Array.from(levelGroups.keys()).sort((a, b) => a - b);
+        
+        let output = `<div class="selected-node">Selected: ${selectedNodeId}</div>`;
+        output += `<div style="margin-top: 15px; margin-bottom: 10px;"><strong>Upstream Dependencies (${levels.size} total):</strong></div>`;
+        
+        sortedLevels.forEach(level => {
+            const nodes = levelGroups.get(level).sort();
+            output += `<div class="level-group">`;
+            output += `<div class="level-title">Level ${level} (${nodes.length} nodes):</div>`;
+            output += `<div class="node-list">${nodes.join(', ')}</div>`;
+            output += `</div>`;
+        });
+        
+        outputDiv.innerHTML = output;
+    }
+    
+    // Function to clear the dependency output display
+    function clearDependencyOutput() {
+        const outputDiv = document.getElementById('dependencyOutput');
+        outputDiv.innerHTML = 'Click on any node to see its upstream dependencies organized by transitivity level.';
     }
 
     // Update positions each tick
+    let tickCount = 0;
     simulation.on("tick", () => {
+        tickCount++;
+        if (tickCount === 1) {
+            console.log('First tick - nodes have positions:', nodes.slice(0, 3).map(n => ({id: n.id, x: n.x, y: n.y})));
+        }
+        
         link.attr("d", d => {
             const { x: sx, y: sy } = d.source;
             const { x: tx, y: ty } = d.target;
@@ -166,6 +317,7 @@
         });
         node.attr("transform", d => `translate(${d.x},${d.y})`);
     });
+});
 </script>
 </body>
 </html>
