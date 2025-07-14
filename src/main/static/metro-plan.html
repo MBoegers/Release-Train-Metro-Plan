@@ -8,8 +8,11 @@
         .link.dependency { stroke: steelblue; }
         .link.parent { stroke: tomato; }
         .link.unused { stroke: orange; stroke-dasharray: 8,4; }
+        .link.lowReferences { stroke-dasharray: 8,4; }
         .link path { stroke-width: 2px; }
-        .node circle { fill: #69b3a2; stroke: #333; stroke-width: 1.5px; }
+        .node circle { fill: #69b3a2; stroke: #333; stroke-width: 1.5px; cursor: pointer; }
+        .node.highlighted circle { fill: #ff6b6b; stroke: #d63031; stroke-width: 3px; }
+        .node.upstream circle { fill: #74b9ff; stroke: #0984e3; stroke-width: 2px; }
         .node text { font-family: sans-serif; font-size: 14px; pointer-events: none; }
     </style>
 </head>
@@ -64,7 +67,7 @@
         .selectAll("path")
         .data(links)
         .join("path")
-        .attr("class", d => `link ${d.type}`)
+        .attr("class", d => `link ${d.type} ${d.lowReferences ? 'lowReferences' : ''}`)
         .attr("marker-end", d => `url(#arrow-${d.type})`);
 
     // Draw nodes
@@ -89,6 +92,70 @@
 
     node.append("circle").attr("r", 20);
     node.append("text").attr("dy", "0.35em").attr("x", 30).text(d => d.id);
+
+    // Add click handler for nodes
+    let selectedNode = null;
+    node.on("click", function(event, d) {
+        event.stopPropagation();
+        
+        // Clear previous highlighting
+        node.classed("highlighted", false);
+        node.classed("upstream", false);
+        
+        if (selectedNode === d.id) {
+            // Deselect if clicking the same node
+            selectedNode = null;
+        } else {
+            // Select new node and find upstream dependencies
+            selectedNode = d.id;
+            
+            // Highlight clicked node
+            d3.select(this).classed("highlighted", true);
+            
+            // Find all nodes reachable backward from this node
+            const upstreamNodes = findUpstreamNodes(d.id, links);
+            console.log(`Clicked node: ${d.id}`);
+            console.log(`Found ${upstreamNodes.size} upstream nodes:`, Array.from(upstreamNodes));
+            
+            // Highlight upstream nodes
+            node.filter(n => upstreamNodes.has(n.id))
+                .classed("upstream", true);
+        }
+    });
+    
+    // Clear selection when clicking on empty space
+    svg.on("click", function() {
+        selectedNode = null;
+        node.classed("highlighted", false);
+        node.classed("upstream", false);
+    });
+    
+    // Function to find all nodes reachable backward from a given node
+    function findUpstreamNodes(targetNodeId, links) {
+        const upstream = new Set();
+        const toVisit = [targetNodeId];
+        const visited = new Set();
+        
+        while (toVisit.length > 0) {
+            const current = toVisit.pop();
+            if (visited.has(current)) continue;
+            visited.add(current);
+            
+            // Find all nodes that point to the current node
+            links.forEach(link => {
+                // Extract ID from link target/source (they may be objects after D3 processing)
+                const linkTargetId = typeof link.target === 'object' ? link.target.id : link.target;
+                const linkSourceId = typeof link.source === 'object' ? link.source.id : link.source;
+                
+                if (linkTargetId === current && !visited.has(linkSourceId)) {
+                    upstream.add(linkSourceId);
+                    toVisit.push(linkSourceId);
+                }
+            });
+        }
+        
+        return upstream;
+    }
 
     // Update positions each tick
     simulation.on("tick", () => {
