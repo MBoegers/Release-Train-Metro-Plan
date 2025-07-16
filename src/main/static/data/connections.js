@@ -130,7 +130,6 @@ const links = [
 	{ source: "openrewrite/rewrite-okhttp", target: "openrewrite/rewrite-java-dependencies", type: "dependency" },
 	{ source: "openrewrite/rewrite-openapi", target: "openrewrite/rewrite", type: "dependency" },
 	{ source: "openrewrite/rewrite-openapi", target: "openrewrite/rewrite-java-dependencies", type: "dependency" },
-	{ source: "openrewrite/rewrite-python", target: "openrewrite/rewrite", type: "dependency" },
 	{ source: "openrewrite/rewrite-quarkus", target: "openrewrite/rewrite", type: "dependency" },
 	{ source: "openrewrite/rewrite-quarkus", target: "openrewrite/rewrite-java-dependencies", type: "dependency" },
 	{ source: "openrewrite/rewrite-recipe-markdown-generator", target: "openrewrite/rewrite", type: "dependency" },
