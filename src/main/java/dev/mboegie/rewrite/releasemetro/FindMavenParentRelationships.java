@@ -7,7 +7,6 @@ import org.openrewrite.*;
 import org.openrewrite.marker.SearchResult;
 import org.openrewrite.maven.search.FindMavenProject;
 import org.openrewrite.xml.XmlIsoVisitor;
-import org.openrewrite.xml.search.FindTags;
 import org.openrewrite.xml.tree.Xml;
 
 import java.util.Optional;
@@ -37,7 +36,7 @@ public class FindMavenParentRelationships extends Recipe {
                     public Xml.Document visitDocument(Xml.Document document, ExecutionContext ctx) {
                         Optional<String> childGroupId = MavenPomExtractor.findGroupId(document);
                         Optional<String> childArtifactId = MavenPomExtractor.findArtifactId(document);
-                        
+
                         Optional<String> parentGroupId = MavenPomExtractor.findParentGroupId(document);
                         Optional<String> parentArtifactId = MavenPomExtractor.findParentArtifactId(document);
                         Optional<String> parentVersion = MavenPomExtractor.findParentVersion(document);

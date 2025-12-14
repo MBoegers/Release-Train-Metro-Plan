@@ -26,7 +26,7 @@ public class FindGradleProjectIDs extends Recipe {
         return Preconditions.check(Preconditions.or(new IsBuildGradle<>()),
                 new TreeVisitor<Tree, ExecutionContext>() {
                     @Override
-                    public @Nullable Tree visit(@Nullable Tree tree, ExecutionContext executionContext) {
+                    public @Nullable Tree visit(@Nullable Tree tree, ExecutionContext ctx) {
                         if (tree == null) {
                             return null;
                         }
@@ -35,7 +35,7 @@ public class FindGradleProjectIDs extends Recipe {
                                 .findFirst(GradleProject.class)
                                 .map(gp -> {
                                     ProjectCoordinates.Row row = new ProjectCoordinates.Row(gp.getGroup(), gp.getName());
-                                    projectCoordinatess.insertRow(executionContext, row);
+                                    projectCoordinatess.insertRow(ctx, row);
                                     return SearchResult.found(tree, row.toString());
                                 }).orElse(tree);
                     }

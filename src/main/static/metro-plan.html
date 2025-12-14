@@ -17,13 +17,20 @@
         .selected-node { color: #e74c3c; font-weight: bold; }
         .level-group { margin-bottom: 12px; }
         .level-title { font-weight: bold; color: #2980b9; margin-bottom: 5px; }
-        .node-list { margin-left: 20px; }
+        .node-list { margin-left: 20px; padding-left: 20px; }
+        .node-list li { margin: 2px 0; }
         .legend { display: flex; gap: 20px; justify-content: center; margin-bottom: 15px; font-size: 14px; }
         .legend-item { display: flex; align-items: center; gap: 5px; }
         .legend-color { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #333; }
         .legend-line { width: 30px; height: 2px; }
         .legend-dashed { stroke-dasharray: 4,2; }
         svg { border: 1px solid #ccc; }
+        .warning-section { background-color: #fff3cd; border-left: 4px solid #ffc107; margin-bottom: 15px; padding: 10px; border-radius: 4px; }
+        .warning-title { color: #856404; font-weight: bold; margin-bottom: 5px; }
+        .warning-list { margin-left: 20px; color: #856404; }
+        .wave-group { margin-bottom: 12px; }
+        .wave-title { font-weight: bold; color: #27ae60; margin-bottom: 5px; }
+        .wave-summary { margin-bottom: 15px; font-size: 14px; color: #555; }
         .link.dependency { stroke: steelblue; }
         .link.parent { stroke: tomato; }
         .link.unused { stroke: orange; stroke-dasharray: 8,4; }
@@ -86,9 +93,15 @@
         <svg width="1400" height="800"></svg>
     </div>
     <div class="output-panel">
-        <div class="output-title">Dependency Analysis</div>
+        <div class="output-title">Impact Analysis</div>
         <div class="output-content" id="dependencyOutput">
             Click on any node to see its upstream dependencies organized by transitivity level.
+        </div>
+    </div>
+    <div class="output-panel" style="margin-top: 20px;">
+        <div class="output-title">Release Layering</div>
+        <div class="output-content" id="releaseLayeringOutput">
+            Computing release waves...
         </div>
     </div>
 <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -287,10 +300,12 @@ document.addEventListener('DOMContentLoaded', function() {
         output += `<div style="margin-top: 15px; margin-bottom: 10px;"><strong>Downstream Dependencies (${levels.size} total):</strong></div>`;
         
         sortedLevels.forEach(level => {
-            const nodes = levelGroups.get(level).sort();
+            const nodeList = levelGroups.get(level).sort();
             output += `<div class="level-group">`;
-            output += `<div class="level-title">Level ${level} (${nodes.length} nodes):</div>`;
-            output += `<div class="node-list">${nodes.join(', ')}</div>`;
+            output += `<div class="level-title">Level ${level} (${nodeList.length} modules):</div>`;
+            output += `<ul class="node-list">`;
+            nodeList.forEach(n => output += `<li>${n}</li>`);
+            output += `</ul>`;
             output += `</div>`;
         });
         
@@ -302,6 +317,113 @@ document.addEventListener('DOMContentLoaded', function() {
         const outputDiv = document.getElementById('dependencyOutput');
         outputDiv.innerHTML = 'Click on any node to see its downstream dependencies organized by transitivity level.';
     }
+
+    // ========== Release Layering Analysis ==========
+
+    // Compute release waves using Kahn's algorithm (topological sort)
+    function computeReleaseWaves() {
+        // Build dependency map: nodeId -> Set of dependency nodeIds (outgoing edges)
+        const dependencyMap = new Map();
+        const allNodeIds = new Set(nodes.map(n => n.id));
+
+        // Initialize all nodes with empty dependency sets
+        allNodeIds.forEach(id => dependencyMap.set(id, new Set()));
+
+        // Populate dependencies from links (source depends on target)
+        links.forEach(link => {
+            const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+            const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+            if (dependencyMap.has(sourceId)) {
+                dependencyMap.get(sourceId).add(targetId);
+            }
+        });
+
+        const waves = new Map(); // waveNumber -> [nodeIds]
+        const nodeWave = new Map(); // nodeId -> waveNumber
+        const remaining = new Set(allNodeIds);
+        let waveNumber = 0;
+
+        while (remaining.size > 0) {
+            // Find nodes whose all dependencies are in previous waves
+            const currentWave = [];
+
+            for (const nodeId of remaining) {
+                const deps = dependencyMap.get(nodeId);
+                const allDepsReleased = [...deps].every(depId => nodeWave.has(depId));
+
+                if (allDepsReleased) {
+                    currentWave.push(nodeId);
+                }
+            }
+
+            if (currentWave.length === 0) {
+                // No progress possible - remaining nodes have circular dependencies
+                break;
+            }
+
+            // Assign current wave
+            waves.set(waveNumber, currentWave.sort());
+            currentWave.forEach(nodeId => {
+                nodeWave.set(nodeId, waveNumber);
+                remaining.delete(nodeId);
+            });
+
+            waveNumber++;
+        }
+
+        // Remaining nodes are in circular dependencies
+        const circularDeps = [...remaining].sort();
+
+        return { waves, circularDeps, totalWaves: waveNumber };
+    }
+
+    // Display release layering analysis
+    function displayReleaseLayering() {
+        const outputDiv = document.getElementById('releaseLayeringOutput');
+        const { waves, circularDeps, totalWaves } = computeReleaseWaves();
+
+        let html = '';
+
+        // Show circular dependencies warning if any
+        if (circularDeps.length > 0) {
+            html += '<div class="warning-section">';
+            html += '<div class="warning-title">Circular Dependencies Detected</div>';
+            html += '<div class="warning-list">The following modules cannot be released due to circular dependencies:';
+            html += '<ul>';
+            circularDeps.forEach(dep => html += `<li>${dep}</li>`);
+            html += '</ul></div></div>';
+        }
+
+        // Show summary
+        const totalNodes = nodes.length;
+        const releaseableNodes = totalNodes - circularDeps.length;
+        html += `<div class="wave-summary">`;
+        html += `<strong>${releaseableNodes}</strong> of <strong>${totalNodes}</strong> modules can be released in <strong>${totalWaves}</strong> waves.`;
+        if (circularDeps.length > 0) {
+            html += ` <span style="color: #856404;">(${circularDeps.length} blocked by circular dependencies)</span>`;
+        }
+        html += `</div>`;
+
+        // Show each wave
+        for (let i = 0; i < totalWaves; i++) {
+            const waveNodes = waves.get(i);
+            html += `<div class="wave-group">`;
+            html += `<div class="wave-title">Wave ${i} (${waveNodes.length} modules):</div>`;
+            html += `<ul class="node-list">`;
+            waveNodes.forEach(n => html += `<li>${n}</li>`);
+            html += `</ul>`;
+            html += `</div>`;
+        }
+
+        if (totalNodes === 0) {
+            html = 'No modules to analyze.';
+        }
+
+        outputDiv.innerHTML = html;
+    }
+
+    // Call release layering analysis on page load
+    displayReleaseLayering();
 
     // Update positions each tick
     let tickCount = 0;

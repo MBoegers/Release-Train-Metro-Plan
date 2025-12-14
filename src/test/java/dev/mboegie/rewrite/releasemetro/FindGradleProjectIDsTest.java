@@ -3,22 +3,22 @@ package dev.mboegie.rewrite.releasemetro;
 import dev.mboegie.rewrite.releasemetro.table.ProjectCoordinates;
 import org.junit.jupiter.api.Test;
 import org.openrewrite.DocumentExample;
-import org.openrewrite.gradle.toolingapi.Assertions;
 import org.openrewrite.test.RecipeSpec;
 import org.openrewrite.test.RewriteTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.openrewrite.gradle.Assertions.buildGradleKts;
 import static org.openrewrite.gradle.Assertions.settingsGradleKts;
+import static org.openrewrite.gradle.toolingapi.Assertions.withToolingApi;
 
 class FindGradleProjectIDsTest implements RewriteTest {
     @Override
     public void defaults(RecipeSpec spec) {
-        spec.beforeRecipe(Assertions.withToolingApi()).recipe(new FindGradleProjectIDs());
+        spec.beforeRecipe(withToolingApi()).recipe(new FindGradleProjectIDs());
     }
 
-    @Test
     @DocumentExample
+    @Test
     void simpleProject() {
         rewriteRun(
           spec -> spec.dataTable(ProjectCoordinates.Row.class,
@@ -82,7 +82,8 @@ class FindGradleProjectIDsTest implements RewriteTest {
                   group = "org.openrewrite"
                   description = "Eliminate tech-debt. Automatically."
               }
-              """),
+              """
+          ),
           settingsGradleKts(
             // language=kotlin
             """

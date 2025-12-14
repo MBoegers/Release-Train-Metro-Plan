@@ -1,24 +1,23 @@
 package dev.mboegie.rewrite.releasemetro;
 
-import dev.mboegie.rewrite.releasemetro.table.ParentRelationships;
 import org.junit.jupiter.api.Test;
 import org.openrewrite.DocumentExample;
-import org.openrewrite.gradle.toolingapi.Assertions;
 import org.openrewrite.test.RecipeSpec;
 import org.openrewrite.test.RewriteTest;
 
 import static org.openrewrite.gradle.Assertions.buildGradleKts;
 import static org.openrewrite.gradle.Assertions.settingsGradleKts;
+import static org.openrewrite.gradle.toolingapi.Assertions.withToolingApi;
 
 class FindGradleParentRelationshipsTest implements RewriteTest {
 
     @Override
     public void defaults(RecipeSpec spec) {
-        spec.beforeRecipe(Assertions.withToolingApi()).recipe(new FindGradleParentRelationships());
+        spec.beforeRecipe(withToolingApi()).recipe(new FindGradleParentRelationships());
     }
 
-    @Test
     @DocumentExample
+    @Test
     void singleProjectNoParent() {
         rewriteRun(
           buildGradleKts(

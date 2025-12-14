@@ -13,6 +13,67 @@
 # limitations under the License.
 ---
 type: specs.openrewrite.org/v1beta/example
+recipeName: dev.mboegie.rewrite.releasemetro.AnalyzeCouplingWeight
+examples:
+- description: ''
+  sources:
+  - before: |
+      package com.example.modulea;
+
+      import com.example.moduleb.ServiceB;
+
+      public class ServiceA {
+          private ServiceB serviceB;
+
+          public void handleRequest(String input) {
+              String result = serviceB.processData(input);
+              System.out.println(result);
+          }
+      }
+    language: java
+  - before: |
+      package com.example.moduleb;
+
+      public class ServiceB {
+          public String processData(String input) {
+              return "processed: " + input;
+          }
+      }
+    language: java
+---
+type: specs.openrewrite.org/v1beta/example
+recipeName: dev.mboegie.rewrite.releasemetro.FindGradleParentRelationships
+examples:
+- description: ''
+  sources:
+  - before: |
+      plugins {
+          id("java")
+      }
+
+      group = "org.openrewrite.recipe"
+
+      dependencies {
+          implementation("org.springframework:spring-core:5.3.21")
+          testImplementation ("org.junit.jupiter:junit-jupiter:5.8.2")
+      }
+    after: |
+      /*~~(org.openrewrite.recipe:rewrite-testing-frameworks)~~>*/plugins {
+          id("java")
+      }
+
+      group = "org.openrewrite.recipe"
+
+      dependencies {
+          implementation("org.springframework:spring-core:5.3.21")
+          testImplementation ("org.junit.jupiter:junit-jupiter:5.8.2")
+      }
+    language: buildGradleKts
+  - before: |
+      rootProject.name = "rewrite-testing-frameworks"
+    language: settingsGradleKts
+---
+type: specs.openrewrite.org/v1beta/example
 recipeName: dev.mboegie.rewrite.releasemetro.FindGradleProjectIDs
 examples:
 - description: ''
@@ -45,6 +106,44 @@ examples:
     language: settingsGradleKts
 ---
 type: specs.openrewrite.org/v1beta/example
+recipeName: dev.mboegie.rewrite.releasemetro.FindMavenParentRelationships
+examples:
+- description: ''
+  sources:
+  - before: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <project xmlns="http://maven.apache.org/POM/4.0.0"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+          <modelVersion>4.0.0</modelVersion>
+          <parent>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-starter-parent</artifactId>
+              <version>3.2.0</version>
+              <relativePath/>
+          </parent>
+          <artifactId>my-app</artifactId>
+          <version>1.0.0</version>
+      </project>
+    after: |
+      <!--~~(org.springframework.boot:my-app -> org.springframework.boot:spring-boot-starter-parent (MAVEN_PARENT))~~>--><?xml version="1.0" encoding="UTF-8"?>
+      <project xmlns="http://maven.apache.org/POM/4.0.0"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+          <modelVersion>4.0.0</modelVersion>
+          <parent>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-starter-parent</artifactId>
+              <version>3.2.0</version>
+              <relativePath/>
+          </parent>
+          <artifactId>my-app</artifactId>
+          <version>1.0.0</version>
+      </project>
+    path: pom.xml
+    language: xml
+---
+type: specs.openrewrite.org/v1beta/example
 recipeName: dev.mboegie.rewrite.releasemetro.FindMavenProjectIDs
 examples:
 - description: ''
@@ -71,3 +170,30 @@ examples:
       </project>
     path: pom.xml
     language: xml
+---
+type: specs.openrewrite.org/v1beta/example
+recipeName: dev.mboegie.rewrite.releasemetro.FindPotentiallyUnusedDependencies
+examples:
+- description: ''
+  sources:
+  - before: |
+      package com.example;
+
+      import org.springframework.context.ApplicationContext;
+      import org.springframework.boot.SpringApplication;
+      import java.util.List;
+
+      public class MyApp {
+          // Simple class without method calls to avoid type resolution issues
+      }
+    after: |
+      /*~~(Uses packages: java.util, org.springframework)~~>*/package com.example;
+
+      import org.springframework.context.ApplicationContext;
+      import org.springframework.boot.SpringApplication;
+      import java.util.List;
+
+      public class MyApp {
+          // Simple class without method calls to avoid type resolution issues
+      }
+    language: java

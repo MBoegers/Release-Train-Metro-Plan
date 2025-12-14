@@ -16,8 +16,8 @@ class FindMavenParentRelationshipsTest implements RewriteTest {
         spec.recipe(new FindMavenParentRelationships());
     }
 
-    @Test
     @DocumentExample
+    @Test
     void childInheritsGroupIdFromParent() {
         rewriteRun(
           spec -> spec.dataTable(ParentRelationships.Row.class, rows -> {

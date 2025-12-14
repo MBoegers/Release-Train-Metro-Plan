@@ -20,25 +20,25 @@ public class ParentRelationships extends DataTable<ParentRelationships.Row> {
                 description = "Group ID of the child project")
         @Nullable
         String childGroupId;
-        
+
         @Column(displayName = "childArtifactId",
                 description = "Artifact ID of the child project")
         String childArtifactId;
-        
+
         @Column(displayName = "parentGroupId",
                 description = "Group ID of the parent project")
         @Nullable
         String parentGroupId;
-        
+
         @Column(displayName = "parentArtifactId",
                 description = "Artifact ID of the parent project")
         String parentArtifactId;
-        
+
         @Column(displayName = "parentVersion",
                 description = "Version of the parent project")
         @Nullable
         String parentVersion;
-        
+
         @Column(displayName = "hierarchyType",
                 description = "Type of hierarchy relationship (MAVEN_PARENT or GRADLE_PARENT)")
         String hierarchyType;

@@ -20,25 +20,25 @@ public class UnusedDependencies extends DataTable<UnusedDependencies.Row> {
                 description = "Group ID of the potentially unused dependency")
         @Nullable
         String dependencyGroupId;
-        
+
         @Column(displayName = "dependencyArtifactId",
                 description = "Artifact ID of the potentially unused dependency")
         String dependencyArtifactId;
-        
+
         @Column(displayName = "dependencyVersion",
                 description = "Version of the potentially unused dependency")
         @Nullable
         String dependencyVersion;
-        
+
         @Column(displayName = "dependencyScope",
                 description = "Scope of the dependency (compile, test, etc.)")
         @Nullable
         String dependencyScope;
-        
+
         @Column(displayName = "isDirect",
                 description = "Whether this is a direct dependency (not transitive)")
         Boolean isDirect;
-        
+
         @Column(displayName = "reasonSuspected",
                 description = "Reason why this dependency is suspected to be unused")
         String reasonSuspected;

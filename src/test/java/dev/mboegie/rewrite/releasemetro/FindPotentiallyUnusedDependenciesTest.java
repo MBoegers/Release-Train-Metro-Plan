@@ -16,8 +16,8 @@ class FindPotentiallyUnusedDependenciesTest implements RewriteTest {
         spec.recipe(new FindPotentiallyUnusedDependencies());
     }
 
-    @Test
     @DocumentExample
+    @Test
     void capturesSpringFrameworkImports() {
         rewriteRun(
           spec -> spec.dataTable(UnusedDependencies.Row.class, rows -> {

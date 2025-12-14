@@ -30,9 +30,9 @@ public class FindGradleParentRelationships extends Recipe {
         return Preconditions.check(Preconditions.or(new IsBuildGradle<>()),
                 new TreeVisitor<Tree, ExecutionContext>() {
                     private final java.util.Map<String, GradleProject> allProjects = new java.util.HashMap<>();
-                    
+
                     @Override
-                    public @Nullable Tree visit(@Nullable Tree tree, ExecutionContext executionContext) {
+                    public @Nullable Tree visit(@Nullable Tree tree, ExecutionContext ctx) {
                         if (tree == null) {
                             return null;
                         }
@@ -42,7 +42,7 @@ public class FindGradleParentRelationships extends Recipe {
                                 .map(gradleProject -> {
                                     String projectPath = gradleProject.getPath();
                                     allProjects.put(projectPath, gradleProject);
-                                    
+
                                     // Determine parent from project path
                                     String parentPath = determineParentPath(projectPath);
                                     if (parentPath != null) {
@@ -57,8 +57,8 @@ public class FindGradleParentRelationships extends Recipe {
                                                     parent.getVersion(),
                                                     "GRADLE_PARENT"
                                             );
-                                            
-                                            parentRelationships.insertRow(executionContext, row);
+
+                                            parentRelationships.insertRow(ctx, row);
                                             return SearchResult.found(tree, row.toString());
                                         }
                                     }
@@ -66,18 +66,17 @@ public class FindGradleParentRelationships extends Recipe {
                                     return SearchResult.found(tree, gradleProject.getGroup() + ":" + gradleProject.getName());
                                 }).orElse(tree);
                     }
-                    
+
                     private String determineParentPath(String projectPath) {
                         if (":".equals(projectPath)) {
                             return null; // Root project has no parent
                         }
-                        
+
                         int lastColon = projectPath.lastIndexOf(':');
                         if (lastColon > 0) {
                             return projectPath.substring(0, lastColon);
-                        } else {
-                            return ":"; // Direct child of root project
                         }
+                        return ":"; // Direct child of root project
                     }
                 });
     }

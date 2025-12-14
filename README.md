@@ -16,8 +16,13 @@ In this session, I will show you how to utilize DataTable and OpenRewrite recipe
 ## How to use
 
 The usage is ATM somehow manual. 
-You run the recipe `org.openrewrite.java.moderne.visualizations.ReleaseTrainMetroPlan` on the codebase's you want to analyze.
+You run the recipe `dev.mboegie.rewrite.releasemetro.ReleaseMetroPlan` on the codebase's you want to analyze.
 If you can use the Moderne CLI it requires less work as it can aggregate the results of multiple runs into one data table.
 After we have the data table, similar to [these examples](src/main/kotlin/data), use the [Kotlin Notebook](src/main/kotlin/ArchitecturalAnalysis.ipynb) to analyze the data.
 It will connect the dots and create the graph out of it, the resulting JSON data can be used to visualize the graph in a web browser using the [Release Train Metro Plan](src/main/static/metro-plan.html) page.
 To update the data just copy the JSON data into the [connections](src/main/static/data/connections.js) file in the static folder.
+
+```shell
+mod run . --recipe dev.mboegie.rewrite.releasemetro.ReleaseMetroPlan --parallel
+mod study . --last-recipe-run --data-table ProjectCoordinates --csv -o ProjectCoordinates.csv && mod study . --last-recipe-run --data-table DependenciesInUse --csv -o DependenciesInUse.csv && mod study . --last-recipe-run --data-table ParentRelationships --csv -o ParentRelationships.csv
+```
