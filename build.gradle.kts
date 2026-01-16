@@ -1,20 +1,26 @@
 plugins {
     id("org.openrewrite.build.recipe-library-base") version "latest.release"
 
-    // This uses the nexus publishing plugin to publish to the moderne-dev repository
-    // Remove it if you prefer to publish by other means, such as the maven-publish plugin
-    id("org.openrewrite.build.publish") version "latest.release"
-    id("nebula.release") version "latest.release"
-
     // Configures artifact repositories used for dependency resolution to include maven central and nexus snapshots.
     // If you are operating in an environment where public repositories are not accessible, we recommend using a
     // virtual repository which mirrors both maven central and nexus snapshots.
     id("org.openrewrite.build.recipe-repositories") version "latest.release"
+
+    // Maven Central publishing
+    `maven-publish`
+    signing
+    id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
 }
 
 // Set as appropriate for your organization
 group = "dev.mboegie.rewrite"
-description = "A set of recipes to derive your release train's metro plan from your organizations reporsitries using OpenRewrite."
+description = "A set of recipes to derive your release train's metro plan from your organizations repositories using OpenRewrite."
+
+// Required for Maven Central: sources and javadoc JARs
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
 
 dependencies {
     // The bom version can also be set to a specific version
@@ -40,27 +46,91 @@ dependencies {
     testImplementation("org.openrewrite:rewrite-test")
 
     // Need to have a slf4j binding to see any output enabled from the parser.
-    runtimeOnly("ch.qos.logback:logback-classic:1.2.+")
+    runtimeOnly("ch.qos.logback:logback-classic:1.2.13")
 
     // needed for IntelliJ OpenRewrite plugin run action
     runtimeOnly("org.openrewrite.recipe:rewrite-rewrite")
 }
 
-signing {
-    // To enable signing have your CI workflow set the "signingKey" and "signingPassword" Gradle project properties
-    isRequired = false
-}
+// Version is set in gradle.properties or can be overridden via -Pversion=x.y.z
+version = findProperty("version") ?: "0.1.0-SNAPSHOT"
 
-// Use maven-style "SNAPSHOT" versioning for non-release builds
-configure<nebula.plugin.release.git.base.ReleasePluginExtension> {
-    defaultVersionStrategy = nebula.plugin.release.NetflixOssStrategies.SNAPSHOT(project)
-}
-
-configure<PublishingExtension> {
+// Maven Central Publishing Configuration
+publishing {
     publications {
-        named("nebula", MavenPublication::class.java) {
-            suppressPomMetadataWarningsFor("runtimeElements")
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+
+            groupId = project.group.toString()
+            artifactId = project.name
+            version = project.version.toString()
+
+            pom {
+                name.set("Release Train Metro Plan")
+                description.set(project.description)
+                url.set("https://github.com/MBoegers/Release-Train-Metro-Plan")
+                inceptionYear.set("2024")
+
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                        distribution.set("repo")
+                    }
+                }
+
+                developers {
+                    developer {
+                        id.set("MBoegers")
+                        name.set("Merlin Bögershausen")
+                        url.set("https://mboegie.dev/")
+                    }
+                }
+
+                scm {
+                    connection.set("scm:git:https://github.com/MBoegers/Release-Train-Metro-Plan.git")
+                    developerConnection.set("scm:git:git@github.com:MBoegers/Release-Train-Metro-Plan.git")
+                    url.set("https://github.com/MBoegers/Release-Train-Metro-Plan")
+                }
+
+                issueManagement {
+                    system.set("GitHub Issues")
+                    url.set("https://github.com/MBoegers/Release-Train-Metro-Plan/issues")
+                }
+            }
         }
+    }
+}
+
+// Nexus Publishing to Maven Central
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
+        }
+    }
+}
+
+// GPG Signing Configuration
+signing {
+    // Enable signing only when publishing (not for local builds)
+    isRequired = gradle.taskGraph.hasTask("publishToSonatype")
+
+    // Use in-memory signing key from environment variables (for CI)
+    val signingKey: String? by project
+    val signingPassword: String? by project
+    if (signingKey != null && signingPassword != null) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+    }
+
+    sign(publishing.publications["mavenJava"])
+}
+
+// Ensure Javadoc doesn't fail the build on warnings
+tasks.withType<Javadoc> {
+    options {
+        (this as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
     }
 }
 
