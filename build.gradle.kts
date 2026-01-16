@@ -83,8 +83,7 @@ publishing {
                     developer {
                         id.set("MBoegers")
                         name.set("Merlin Bögershausen")
-                        email.set("merlin.boegershausen@rwth-aachen.de")
-                        url.set("https://github.com/MBoegers")
+                        url.set("https://mboegie.dev/")
                     }
                 }
 
