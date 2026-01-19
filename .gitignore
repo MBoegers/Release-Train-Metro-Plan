@@ -1,8 +1,10 @@
 build/
 target/
+bin/
 .gradle/
 .idea/
 out/
 src/main/generated/
 .vscode/
+.context/
 *.iml
