@@ -27,6 +27,7 @@ dependencies {
     // https://github.com/openrewrite/rewrite-recipe-bom/releases
     implementation(platform("org.openrewrite.recipe:rewrite-recipe-bom:latest.release"))
 
+    implementation("org.openrewrite:rewrite-java")
     implementation("org.assertj:assertj-core:latest.release")
 
     // to have access to org.openrewrite.java.dependencies.DependencyInsight
@@ -45,8 +46,11 @@ dependencies {
     // The RewriteTest class needed for testing recipes
     testImplementation("org.openrewrite:rewrite-test")
 
+    // Support for parsing Java 25 (backward compatible with 21 and earlier)
+    testRuntimeOnly("org.openrewrite:rewrite-java-25")
+
     // Need to have a slf4j binding to see any output enabled from the parser.
-    runtimeOnly("ch.qos.logback:logback-classic:1.2.13")
+    runtimeOnly("ch.qos.logback:logback-classic:1.5.+")
 
     // needed for IntelliJ OpenRewrite plugin run action
     runtimeOnly("org.openrewrite.recipe:rewrite-rewrite")
@@ -58,7 +62,7 @@ version = findProperty("version") ?: "0.1.0-SNAPSHOT"
 // Maven Central Publishing Configuration
 publishing {
     publications {
-        create<MavenPublication>("mavenJava") {
+        create<MavenPublication>("nebula") {
             from(components["java"])
 
             groupId = project.group.toString()
@@ -124,7 +128,7 @@ signing {
         useInMemoryPgpKeys(signingKey, signingPassword)
     }
 
-    sign(publishing.publications["mavenJava"])
+    sign(publishing.publications["nebula"])
 }
 
 // Ensure Javadoc doesn't fail the build on warnings

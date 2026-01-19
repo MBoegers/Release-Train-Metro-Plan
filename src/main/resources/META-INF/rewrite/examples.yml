@@ -13,38 +13,9 @@
 # limitations under the License.
 ---
 type: specs.openrewrite.org/v1beta/example
-recipeName: dev.mboegie.rewrite.releasemetro.AnalyzeCouplingWeight
-examples:
-- description: ''
-  sources:
-  - before: |
-      package com.example.modulea;
-
-      import com.example.moduleb.ServiceB;
-
-      public class ServiceA {
-          private ServiceB serviceB;
-
-          public void handleRequest(String input) {
-              String result = serviceB.processData(input);
-              System.out.println(result);
-          }
-      }
-    language: java
-  - before: |
-      package com.example.moduleb;
-
-      public class ServiceB {
-          public String processData(String input) {
-              return "processed: " + input;
-          }
-      }
-    language: java
----
-type: specs.openrewrite.org/v1beta/example
 recipeName: dev.mboegie.rewrite.releasemetro.FindGradleParentRelationships
 examples:
-- description: ''
+- description: '`FindGradleParentRelationshipsTest#singleProjectNoParent`'
   sources:
   - before: |
       plugins {
@@ -76,7 +47,7 @@ examples:
 type: specs.openrewrite.org/v1beta/example
 recipeName: dev.mboegie.rewrite.releasemetro.FindGradleProjectIDs
 examples:
-- description: ''
+- description: '`FindGradleProjectIDsTest#simpleProject`'
   sources:
   - before: |
       plugins {
@@ -108,7 +79,7 @@ examples:
 type: specs.openrewrite.org/v1beta/example
 recipeName: dev.mboegie.rewrite.releasemetro.FindMavenParentRelationships
 examples:
-- description: ''
+- description: '`FindMavenParentRelationshipsTest#childInheritsGroupIdFromParent`'
   sources:
   - before: |
       <?xml version="1.0" encoding="UTF-8"?>
@@ -146,7 +117,7 @@ examples:
 type: specs.openrewrite.org/v1beta/example
 recipeName: dev.mboegie.rewrite.releasemetro.FindMavenProjectIDs
 examples:
-- description: ''
+- description: '`FindMavenProjectIDsTest#singleModule`'
   sources:
   - before: |
       <?xml version="1.0" encoding="UTF-8"?>
@@ -174,7 +145,7 @@ examples:
 type: specs.openrewrite.org/v1beta/example
 recipeName: dev.mboegie.rewrite.releasemetro.FindPotentiallyUnusedDependencies
 examples:
-- description: ''
+- description: '`FindPotentiallyUnusedDependenciesTest#capturesSpringFrameworkImports`'
   sources:
   - before: |
       package com.example;
