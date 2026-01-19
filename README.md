@@ -26,3 +26,27 @@ To update the data just copy the JSON data into the [connections](src/main/stati
 mod run . --recipe dev.mboegie.rewrite.releasemetro.ReleaseMetroPlan --parallel
 mod study . --last-recipe-run --data-table ProjectCoordinates --csv -o ProjectCoordinates.csv && mod study . --last-recipe-run --data-table DependenciesInUse --csv -o DependenciesInUse.csv && mod study . --last-recipe-run --data-table ParentRelationships --csv -o ParentRelationships.csv
 ```
+
+## Using the Python notebook
+
+This repository includes a Python-based notebook, and you can set up a virtual environment with the necessary dependencies using uv:
+
+```bash
+# Create your virtual environment
+uv venv
+source .venv/bin/activate
+
+# Install all of the project dependencies into your virtual environment
+uv sync
+```
+
+You're now ready to select the virtual environment as your target kernel in Jupyter editors like VS Code or run the notebook from the commandline using the papermill project (replacing `<MODERNE_WORKSPACE>` with the path to your workspace of repositories and `<RECIPE_ID>` with the recipe ID from a run of the `dev.mboegie.rewrite.releasemetro.ReleaseMetroPlan` from this repository):
+
+```bash
+ papermill ArchitecturalAnalysis.ipynb \
+  ArchitecturalAnalysis_out.ipynb \
+  -p workspace <MODERNE_WORKSPACE> \
+  -p recipe_run <RECIPE_ID> \
+  --progress-bar \
+  --inject-paths
+```
