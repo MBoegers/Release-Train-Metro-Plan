@@ -145,7 +145,17 @@ tasks.withType<Javadoc> {
 license {
     header = file("gradle/licenseHeader.txt")
     ext["year"] = Calendar.getInstance().get(Calendar.YEAR)
-    mapping("java", "SLASHSTAR_STYLE")
     strictCheck = true
+
+    // File type to comment style mappings
+    mapping("java", "SLASHSTAR_STYLE")
+    mapping("kt", "SLASHSTAR_STYLE")      // Kotlin
+    mapping("kts", "SLASHSTAR_STYLE")     // Kotlin Script
+    mapping("py", "SCRIPT_STYLE")         // Python (# comments)
+    mapping("html", "XML_STYLE")          // HTML (<!-- --> comments)
+    mapping("css", "SLASHSTAR_STYLE")     // CSS
+    mapping("js", "SLASHSTAR_STYLE")      // JavaScript
+    mapping("ts", "SLASHSTAR_STYLE")      // TypeScript
+
     exclude("**/package-info.java")
 }
