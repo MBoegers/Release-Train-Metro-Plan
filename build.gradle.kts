@@ -1,3 +1,5 @@
+import java.util.Calendar
+
 plugins {
     id("org.openrewrite.build.recipe-library-base") version "latest.release"
 
@@ -5,6 +7,9 @@ plugins {
     // If you are operating in an environment where public repositories are not accessible, we recommend using a
     // virtual repository which mirrors both maven central and nexus snapshots.
     id("org.openrewrite.build.recipe-repositories") version "latest.release"
+
+    // License header management
+    id("com.github.hierynomus.license") version "0.16.1"
 
     // Maven Central publishing
     `maven-publish`
@@ -15,6 +20,7 @@ plugins {
 // Set as appropriate for your organization
 group = "dev.mboegie.rewrite"
 description = "A set of recipes to derive your release train's metro plan from your organizations repositories using OpenRewrite."
+version = findProperty("version")!!
 
 // Required for Maven Central: sources and javadoc JARs
 java {
@@ -55,9 +61,6 @@ dependencies {
     // needed for IntelliJ OpenRewrite plugin run action
     runtimeOnly("org.openrewrite.recipe:rewrite-rewrite")
 }
-
-// Version is set in gradle.properties or can be overridden via -Pversion=x.y.z
-version = findProperty("version") ?: "0.1.0-SNAPSHOT"
 
 // Maven Central Publishing Configuration
 publishing {
@@ -138,6 +141,11 @@ tasks.withType<Javadoc> {
     }
 }
 
-tasks.register("licenseFormat") {
-    println("License format task not implemented for rewrite-recipe-starter")
+// License header configuration
+license {
+    header = file("gradle/licenseHeader.txt")
+    ext["year"] = Calendar.getInstance().get(Calendar.YEAR)
+    mapping("java", "SLASHSTAR_STYLE")
+    strictCheck = true
+    exclude("**/package-info.java")
 }
