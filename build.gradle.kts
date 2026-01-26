@@ -72,6 +72,16 @@ publishing {
             artifactId = project.name
             version = project.version.toString()
 
+            // Resolve dynamic versions (e.g., "1.5.+", "latest.release") to concrete versions in published POM
+            versionMapping {
+                usage("java-api") {
+                    fromResolutionOf("runtimeClasspath")
+                }
+                usage("java-runtime") {
+                    fromResolutionResult()
+                }
+            }
+
             pom {
                 name.set("Release Train Metro Plan")
                 description.set(project.description)
