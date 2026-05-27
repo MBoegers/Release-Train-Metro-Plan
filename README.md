@@ -18,13 +18,16 @@ In this session, I will show you how to utilize DataTable and OpenRewrite recipe
 The usage is ATM somehow manual. 
 You run the recipe `dev.mboegie.rewrite.releasemetro.ReleaseMetroPlan` on the codebase's you want to analyze.
 If you can use the Moderne CLI it requires less work as it can aggregate the results of multiple runs into one data table.
-After we have the data table, similar to [these examples](src/main/kotlin/data), use the [Kotlin Notebook](src/main/kotlin/ArchitecturalAnalysis.ipynb) to analyze the data.
+After we have the data table, similar to [these examples](src/main/kotlin/data), use the [Python Notebook](src/main/python/ArchitecturalAnalysis.ipynb) to analyze the data.
 It will connect the dots and create the graph out of it, the resulting JSON data can be used to visualize the graph in a web browser using the [Release Train Metro Plan](src/main/static/metro-plan.html) page.
 To update the data just copy the JSON data into the [connections](src/main/static/data/connections.js) file in the static folder.
 
 ```shell
+mod config recipes jar install dev.mboegie.rewrite:release-train-metro-plan:0.0.4
 mod run . --recipe dev.mboegie.rewrite.releasemetro.ReleaseMetroPlan --parallel
-mod study . --last-recipe-run --data-table ProjectCoordinates --csv -o ProjectCoordinates.csv && mod study . --last-recipe-run --data-table DependenciesInUse --csv -o DependenciesInUse.csv && mod study . --last-recipe-run --data-table ParentRelationships --csv -o ParentRelationships.csv
+mod study . --last-recipe-run --data-table ProjectCoordinates --csv -o ProjectCoordinates.csv && \
+  mod study . --last-recipe-run --data-table DependenciesInUse --csv -o DependenciesInUse.csv && \
+  mod study . --last-recipe-run --data-table ParentRelationships --csv -o ParentRelationships.csv
 ```
 
 ## Using the Python notebook
@@ -43,7 +46,7 @@ uv sync
 You're now ready to select the virtual environment as your target kernel in Jupyter editors like VS Code or run the notebook from the commandline using the papermill project (replacing `<MODERNE_WORKSPACE>` with the path to your workspace of repositories and `<RECIPE_ID>` with the recipe ID from a run of the `dev.mboegie.rewrite.releasemetro.ReleaseMetroPlan` from this repository):
 
 ```bash
- papermill ArchitecturalAnalysis.ipynb \
+ papermill src/main/python/ArchitecturalAnalysis.ipynb \
   ArchitecturalAnalysis_out.ipynb \
   -p workspace <MODERNE_WORKSPACE> \
   -p recipe_run <RECIPE_ID> \
